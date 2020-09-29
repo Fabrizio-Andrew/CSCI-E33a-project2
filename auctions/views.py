@@ -62,19 +62,25 @@ def register(request):
     else:
         return render(request, "auctions/register.html")
 
+def index(request):
+    return render(request, "auctions/index.html", {
+        "listings": listing.objects.all()
+    })
+
+
 def new_listing(request):
     return render(request, "auctions/create_listing.html")
 
 
 def create_listing(request):
     if request.method == "POST":
-        print(request.POST)
+        user_id = request.POST["user_id"]
         x = listing(title=request.POST["title"],
-                    starting_bid=request.POST["starting_bid"],
+                    bid=request.POST["starting_bid"],
                     category=request.POST["category"],
                     image_url=request.POST["image_url"],
-                    description=request.POST["description"]
+                    description=request.POST["description"],
+                    owner=User.objects.get(pk=user_id)
         )
         x.save()
-        print("saved")
         return render(request, "auctions/index.html")
