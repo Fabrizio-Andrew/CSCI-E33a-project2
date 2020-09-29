@@ -9,7 +9,7 @@ class User(AbstractUser):
 
 
 # TO-DO: mess with this for next specs.
-class listing(models.Model):
+class Listing(models.Model):
     title = models.CharField(max_length=64)
     description = models.TextField(max_length=500)
     bid = models.DecimalField(max_digits=8, decimal_places=2)
