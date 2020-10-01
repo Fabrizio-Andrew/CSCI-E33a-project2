@@ -7,10 +7,6 @@ from django.urls import reverse
 from .models import User, Listing
 
 
-def index(request):
-    return render(request, "auctions/index.html")
-
-
 def login_view(request):
     if request.method == "POST":
 
@@ -84,3 +80,12 @@ def create_listing(request):
         )
         x.save()
         return HttpResponseRedirect(reverse("index"))
+
+def listing_page(request, name):
+    print(name)
+    listing = Listing.objects.get(title=name)
+    print(f"object {listing}")
+    print(f"title: {listing.title}")
+    return (request, "auctions/listing_page.html", {
+        "listing": listing
+    })
