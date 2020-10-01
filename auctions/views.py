@@ -82,10 +82,7 @@ def create_listing(request):
         return HttpResponseRedirect(reverse("index"))
 
 def listing_page(request, name):
-    print(name)
-    listing = Listing.objects.get(title=name)
-    print(f"object {listing}")
-    print(f"title: {listing.title}")
-    return (request, "auctions/listing_page.html", {
+    listing = Listing.objects.get(title=f"{name}")
+    return render(request, "auctions/listing_page.html", {
         "listing": listing
     })
