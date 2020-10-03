@@ -1,6 +1,7 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
+
 <ol>
   <li><img src="{{ listing.image_url }}" style="height: 50px; width: 50px"> <strong>{{ listing.title }}</strong></li>
     <ul>
@@ -9,4 +10,15 @@
     </ul>
     <br>
 </ol>
+
+{% if user.is_authenticated %}
+  {% if listing not in watchlist %}
+      <form action="{% url 'watch' %}" method="POST">
+          {% csrf_token %}
+          <input type="hidden" value="{{ listing.id }}" name="listing_id">
+          <input type="hidden" value="{{ user.id }}" name="user_id">
+          <input class="btn btn-primary" type="Submit" Name="Watch" value="Watch">
+      </form>
+  {% endif %}
+{% endif %}
 {% endblock %}

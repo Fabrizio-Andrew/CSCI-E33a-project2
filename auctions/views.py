@@ -81,8 +81,25 @@ def create_listing(request):
         x.save()
         return HttpResponseRedirect(reverse("index"))
 
-def listing_page(request, name):
-    listing = Listing.objects.get(title=f"{name}")
+def listing_page(request, listing_name, user_id):
+    listing = Listing.objects.get(title=f"{listing_name}")
+    user = User.objects.get(pk=user_id)
+    watchlist = user.watchlist.all()
     return render(request, "auctions/listing_page.html", {
-        "listing": listing
+        "listing": listing,
+        "watchlist": watchlist,
+        "user": user
+    })
+
+def watch(request):
+    if request.method == "POST":
+        user = User.objects.get(pk=request.POST["user_id"])
+        listing = Listing.objects.get(pk=request.POST["listing_id"])
+        user.watchlist.add(listing)
+        return HttpResponseRedirect(f"/listing/{listing.title}/{user.id}")
+
+def watchlist(request, user_id):
+    user = User.objects.get(pk=user_id)
+    return render(request, "auctions/watchlist.html", {
+        "watchlist": user.watchlist.all()
     })

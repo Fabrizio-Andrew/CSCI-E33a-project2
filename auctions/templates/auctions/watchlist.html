@@ -1,9 +1,9 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-    <h2>Active Listings</h2>
+    <h2>{{ user.username }}'s Watchlist</h2>
 <ol>
-  {% for listing in listings %}
+  {% for listing in watchlist %}
   <li><img src="{{ listing.image_url }}" style="height: 50px; width: 50px"> <a href = "/listing/{{ listing.title }}/{{ user.id }}">{{ listing.title }}</a></li>
     <ul>
       <li>Current bid: ${{ listing.bid }}</li>
