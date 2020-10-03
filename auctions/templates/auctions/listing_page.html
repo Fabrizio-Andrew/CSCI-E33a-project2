@@ -12,13 +12,15 @@
 </ol>
 
 {% if user.is_authenticated %}
-  {% if listing not in watchlist %}
       <form action="{% url 'watch' %}" method="POST">
           {% csrf_token %}
           <input type="hidden" value="{{ listing.id }}" name="listing_id">
           <input type="hidden" value="{{ user.id }}" name="user_id">
-          <input class="btn btn-primary" type="Submit" Name="Watch" value="Watch">
+          {% if listing in watchlist %}
+            <input class="btn btn-secondary" type="Submit" Name="Unwatch" value="Unwatch">
+          {% elif listing not in watchlist %}
+            <input class="btn btn-primary" type="Submit" Name="Watch" value="Watch">
+          {% endif %}
       </form>
-  {% endif %}
 {% endif %}
 {% endblock %}

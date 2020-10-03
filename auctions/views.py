@@ -92,10 +92,17 @@ def listing_page(request, listing_name, user_id):
     })
 
 def watch(request):
+    """
+    Handles adding/removing listings from user's watchlist.
+    """
+    print(request)
     if request.method == "POST":
         user = User.objects.get(pk=request.POST["user_id"])
         listing = Listing.objects.get(pk=request.POST["listing_id"])
-        user.watchlist.add(listing)
+        if listing in user.watchlist.all():
+            user.watchlist.remove(listing)
+        else:
+            user.watchlist.add(listing)
         return HttpResponseRedirect(f"/listing/{listing.title}/{user.id}")
 
 def watchlist(request, user_id):
