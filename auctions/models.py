@@ -18,7 +18,6 @@ class Listing(models.Model):
     category = models.CharField(max_length=64)
     owner = models.ForeignKey('User', related_name='listing_owner', on_delete=models.CASCADE)
     active = models.BooleanField()
-    comments = models.ForeignKey('Comments', related_name='comments', on_delete=models.CASCADE, blank=True, null=True)
 
 class Bids(models.Model):
     user = models.ForeignKey('User', related_name='bidder', on_delete=models.CASCADE)
@@ -30,4 +29,4 @@ class Comments(models.Model):
     author = models.ForeignKey('User', related_name='author', on_delete=models.CASCADE)
     listing = models.ForeignKey('Listing', related_name='listing_comment', on_delete=models.CASCADE)
     body = models.TextField(max_length=500)
-    timestamp = models.DateTimeField(auto_now=False)
+    timestamp = models.DateTimeField(auto_now_add=True)
