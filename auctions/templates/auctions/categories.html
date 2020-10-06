@@ -4,7 +4,7 @@
     <h2>Categories</h2>
 <ol>
   {% for entry in categories %}
-    <li>{{ entry.category }}</li>
+    <li><a href="category_listing/{{ entry.category }}">{{ entry.category }}</a></li>
     <br>
   {% endfor%}
 </ol>

@@ -17,7 +17,7 @@ class Listing(models.Model):
     image_url = models.URLField()
     category = models.CharField(max_length=64)
     owner = models.ForeignKey('User', related_name='listing_owner', on_delete=models.CASCADE)
-    Active = models.BooleanField()
+    active = models.BooleanField()
     comments = models.ForeignKey('Comments', related_name='comments', on_delete=models.CASCADE, blank=True, null=True)
 
 class Bids(models.Model):

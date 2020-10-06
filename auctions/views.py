@@ -72,11 +72,12 @@ def create_listing(request):
     if request.method == "POST":
         user_id = request.POST["user_id"]
         x = Listing(title=request.POST["title"],
-                    bid=request.POST["starting_bid"],
+                    starting_bid=request.POST["starting_bid"],
                     category=request.POST["category"],
                     image_url=request.POST["image_url"],
                     description=request.POST["description"],
-                    owner=User.objects.get(pk=user_id)
+                    owner=User.objects.get(pk=user_id),
+                    active=True
         )
         x.save()
         return HttpResponseRedirect(reverse("index"))
@@ -121,4 +122,7 @@ def categories(request):
     })
 
 def category_listing(request, category):
-    pass
+    return render(request, "auctions/category_listing.html", {
+        "category": category,
+        "listings": Listing.objects.filter(category=category)
+    })
