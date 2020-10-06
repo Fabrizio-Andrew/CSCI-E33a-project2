@@ -110,3 +110,15 @@ def watchlist(request, user_id):
     return render(request, "auctions/watchlist.html", {
         "watchlist": user.watchlist.all()
     })
+
+def categories(request):
+    categories = Listing.objects.values('category').distinct()
+    print(categories)
+    for entry in categories:
+        print(entry['category'])
+    return render(request, "auctions/categories.html", {
+        "categories": categories
+    })
+
+def category_listing(request, category):
+    pass
