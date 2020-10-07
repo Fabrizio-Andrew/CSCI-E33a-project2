@@ -4,7 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import User, Listing
+from .models import User, Listing, Comments
 
 
 def login_view(request):
@@ -71,7 +71,7 @@ def new_listing(request):
 def create_listing(request):
     if request.method == "POST":
         user_id = request.POST["user_id"]
-        x = Listing(title=request.POST["title"],
+        newlisting = Listing(title=request.POST["title"],
                     starting_bid=request.POST["starting_bid"],
                     category=request.POST["category"],
                     image_url=request.POST["image_url"],
@@ -79,24 +79,25 @@ def create_listing(request):
                     owner=User.objects.get(pk=user_id),
                     active=True
         )
-        x.save()
+        newlisting.save()
         return HttpResponseRedirect(reverse("index"))
 
 def listing_page(request, listing_name, user_id):
     listing = Listing.objects.get(title=f"{listing_name}")
     user = User.objects.get(pk=user_id)
     watchlist = user.watchlist.all()
+    comments = Comments.objects.filter(listing=listing)
     return render(request, "auctions/listing_page.html", {
         "listing": listing,
         "watchlist": watchlist,
-        "user": user
+        "user": user,
+        "comments": comments
     })
 
 def watch(request):
     """
     Handles adding/removing listings from user's watchlist.
     """
-    print(request)
     if request.method == "POST":
         user = User.objects.get(pk=request.POST["user_id"])
         listing = Listing.objects.get(pk=request.POST["listing_id"])
@@ -114,9 +115,7 @@ def watchlist(request, user_id):
 
 def categories(request):
     categories = Listing.objects.values('category').distinct()
-    print(categories)
     for entry in categories:
-        print(entry['category'])
     return render(request, "auctions/categories.html", {
         "categories": categories
     })
@@ -126,3 +125,14 @@ def category_listing(request, category):
         "category": category,
         "listings": Listing.objects.filter(category=category)
     })
+
+def add_comment(request):
+    if request.method == "POST":
+        listing = Listing.objects.get(pk=request.POST["listing_id"])
+        user = User.objects.get(pk=request.POST["user_id"])
+        newcomment = Comments(author=user,
+                    listing=listing,
+                    body=request.POST["comment"]
+        )
+        newcomment.save()
+    return HttpResponseRedirect(f"/listing/{listing.title}/{user.id}")

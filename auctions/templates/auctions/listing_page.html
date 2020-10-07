@@ -2,25 +2,46 @@
 
 {% block body %}
 
-<ol>
-  <li><img src="{{ listing.image_url }}" style="height: 50px; width: 50px"> <strong>{{ listing.title }}</strong></li>
-    <ul>
-      <li>Current bid: ${{ listing.bid }}</li>
-      <li>{{ listing.description }}</li>
-    </ul>
-    <br>
-</ol>
+<img src="{{ listing.image_url }}" style="height: 50px; width: 50px"> <strong>{{ listing.title }}</strong></li>
+  <ul>
+    <li>Current bid: ${{ listing.bid }}</li>
+    <li>{{ listing.description }}</li>
+  </ul>
+  <br>
+
 
 {% if user.is_authenticated %}
       <form action="{% url 'watch' %}" method="POST">
           {% csrf_token %}
           <input type="hidden" value="{{ listing.id }}" name="listing_id">
           <input type="hidden" value="{{ user.id }}" name="user_id">
+<!--Is it okay to include this conditional in html, or should that be in views.py?-->
           {% if listing in watchlist %}
             <input class="btn btn-secondary" type="Submit" Name="Unwatch" value="Unwatch">
           {% elif listing not in watchlist %}
             <input class="btn btn-primary" type="Submit" Name="Watch" value="Watch">
           {% endif %}
+      </form>
+{% endif %}
+<br>
+<strong>Comments:</strong>
+<ol>
+  {% for comment in comments %}
+    <li>{{ comment.body }}</li>
+      <ul>
+        <li style="font-style: italic">{{ comment.author }} -- {{ comment.timestamp }}</li>
+      </ul>
+      <br>
+  {% endfor %}
+</ol>
+
+{% if user.is_authenticated %}
+      <form action="{% url 'add_comment' %}" method="POST">
+        {% csrf_token %}
+        <input type="hidden" value="{{ user.id }}" name="user_id">
+        <input type="hidden" value="{{ listing.pk }}" name="listing_id">
+        <textarea class="form-control" name="comment" placeholder="Enter Comment"></textarea>
+        <input class="btn btn-primary" type="Submit" Name="Submit" value="Submit">
       </form>
 {% endif %}
 {% endblock %}
