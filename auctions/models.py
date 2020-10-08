@@ -12,7 +12,6 @@ class User(AbstractUser):
 class Listing(models.Model):
     title = models.CharField(max_length=64)
     description = models.TextField(max_length=500)
-    starting_bid = models.DecimalField(max_digits=8, decimal_places=2)
     bidders = models.ManyToManyField('User', through='Bids', through_fields=('listing', 'user'), related_name='bidders')
     image_url = models.URLField()
     category = models.CharField(max_length=64)
@@ -23,6 +22,7 @@ class Bids(models.Model):
     user = models.ForeignKey('User', related_name='bidder', on_delete=models.CASCADE)
     listing = models.ForeignKey('Listing', related_name='listing_bid', on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=8, decimal_places=2)
+    starting_bid = models.BooleanField()
     timestamp = models.DateTimeField(auto_now_add=True)
 
 class Comments(models.Model):
