@@ -3,8 +3,9 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from decimal import Decimal
 
-from .models import User, Listing, Comments
+from .models import User, Listing, Comments, Bids
 
 
 def login_view(request):
@@ -59,8 +60,17 @@ def register(request):
         return render(request, "auctions/register.html")
 
 def index(request):
+    """
+    For all objects in Listing, gets the highest bid amount from all related bid
+    objects.  Appends "high_bid" to the listing object, and appends the updated
+    listing object to a list called "listings".
+    """
+    listings = []
+    for entry in Listing.objects.all():
+        entry.high_bid = max(Bids.objects.filter(listing=entry).values("amount"))['amount']
+        listings.append(entry)
     return render(request, "auctions/index.html", {
-        "listings": Listing.objects.all()
+        "listings": listings
     })
 
 
@@ -69,34 +79,54 @@ def new_listing(request):
 
 
 def create_listing(request):
+    """
+    Given the details of the user, listing, and starting bid for an item,
+    create instances of the Listing and Bids models to represent the item and
+    starting bid.  Return redirect to index.
+    """
     if request.method == "POST":
-        user_id = request.POST["user_id"]
+        user = User.objects.get(pk=request.POST["user_id"])
         newlisting = Listing(title=request.POST["title"],
-                    starting_bid=request.POST["starting_bid"],
                     category=request.POST["category"],
                     image_url=request.POST["image_url"],
                     description=request.POST["description"],
-                    owner=User.objects.get(pk=user_id),
+                    owner=user,
                     active=True
         )
         newlisting.save()
+        print(newlisting.pk)
+        startingbid = Bids(user=user,
+                        listing=newlisting,
+                        amount=request.POST["starting_bid"],
+                        starting_bid=True,
+        )
+        startingbid.save()
         return HttpResponseRedirect(reverse("index"))
 
-def listing_page(request, listing_name, user_id):
-    listing = Listing.objects.get(title=f"{listing_name}")
-    user = User.objects.get(pk=user_id)
-    watchlist = user.watchlist.all()
-    comments = Comments.objects.filter(listing=listing)
-    return render(request, "auctions/listing_page.html", {
+def listing_page(request, listing_id, user_id):
+    """
+    Given a listing_id and user_id (if authenticated), return the related listing
+    info, current bid, comments, and watchlist info as context for listing_page.html.
+    """
+    listing = Listing.objects.get(pk=listing_id)
+    high_bid = Bids.objects.filter(listing=listing).order_by('amount')[0]
+    context = {
         "listing": listing,
-        "watchlist": watchlist,
-        "user": user,
-        "comments": comments
-    })
+        "comments": Comments.objects.filter(listing=listing),
+        "current_bid": high_bid.amount,
+        "start_bid_ind": high_bid.starting_bid
+    }
+    if request.user.is_authenticated:
+        user = User.objects.get(pk=user_id)
+        context['watchlist'] = user.watchlist.all()
+        context['user'] = user
+    return render(request, "auctions/listing_page.html", context)
+
 
 def watch(request):
     """
-    Handles adding/removing listings from user's watchlist.
+    Given a user and listing via POST, adds/removes the listing from
+    the user's watchlist.
     """
     if request.method == "POST":
         user = User.objects.get(pk=request.POST["user_id"])
@@ -105,28 +135,40 @@ def watch(request):
             user.watchlist.remove(listing)
         else:
             user.watchlist.add(listing)
-        return HttpResponseRedirect(f"/listing/{listing.title}/{user.id}")
+        return HttpResponseRedirect(f"/listing/{listing.id}/{user.id}")
 
 def watchlist(request, user_id):
+    """
+    Given a user, returns the user's watchlist as context for watchlist.html.
+    """
     user = User.objects.get(pk=user_id)
     return render(request, "auctions/watchlist.html", {
         "watchlist": user.watchlist.all()
     })
 
 def categories(request):
-    categories = Listing.objects.values('category').distinct()
-    for entry in categories:
+    """
+    Gets a list of distinct categories from the Listing table and provides list
+    as context for categories.html.
+    """
     return render(request, "auctions/categories.html", {
-        "categories": categories
+        "categories": Listing.objects.values('category').distinct()
     })
 
 def category_listing(request, category):
+    """
+    Given a category, returns a list of listings with in that category as context
+    for category_listing.html.
+    """
     return render(request, "auctions/category_listing.html", {
         "category": category,
         "listings": Listing.objects.filter(category=category)
     })
 
 def add_comment(request):
+    """
+    Accepts data via POST to create a Comment object associated to a User and Listing.
+    """
     if request.method == "POST":
         listing = Listing.objects.get(pk=request.POST["listing_id"])
         user = User.objects.get(pk=request.POST["user_id"])
@@ -135,4 +177,41 @@ def add_comment(request):
                     body=request.POST["comment"]
         )
         newcomment.save()
-    return HttpResponseRedirect(f"/listing/{listing.title}/{user.id}")
+    return HttpResponseRedirect(f"/listing/{listing.id}/{user.id}")
+
+def bid(request):
+    """
+    Work in Progress
+    """
+    if request.method == "POST":
+        listing = Listing.objects.get(pk=request.POST["listing_id"])
+        user = User.objects.get(pk=request.POST["user_id"])
+        bid_amount = Decimal(request.POST["bid_amount"])
+        print(bid_amount)
+        starting_bid = Bids.objects.get(listing=listing, starting_bid=True)
+        existing_bids = Bids.objects.filter(listing=listing, starting_bid=False).values("amount")
+        if existing_bids:
+            print(f"YES BIDS: {existing_bids}")
+            high_bid = max(existing_bids)['amount']
+            print(high_bid)
+            if bid_amount > high_bid:
+                print(max(existing_bids))
+                newbid = Bids(user=user,
+                        listing=listing,
+                        amount=bid_amount,
+                        starting_bid=False
+                )
+                newbid.save()
+                return HttpResponseRedirect(f"/listing/{listing.id}/{user.id}")
+            else:
+                return print("ERROR: bid too small")
+        elif bid_amount >= starting_bid.amount:
+            newbid = Bids(user=user,
+                    listing=listing,
+                    amount=bid_amount,
+                    starting_bid=False
+            )
+            newbid.save()
+            return HttpResponseRedirect(f"/listing/{listing.id}/{user.id}")
+        else:
+            return print("ERROR: bid too small")

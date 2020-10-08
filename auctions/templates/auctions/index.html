@@ -4,9 +4,9 @@
     <h2>Active Listings</h2>
 <ol>
   {% for listing in listings %}
-  <li><img src="{{ listing.image_url }}" style="height: 50px; width: 50px"> <a href = "/listing/{{ listing.title }}/{{ user.id }}">{{ listing.title }}</a></li>
+  <li><img src="{{ listing.image_url }}" style="height: 50px; width: 50px"> <a href = "/listing/{{ listing.pk }}/{{ user.id }}">{{ listing.title }}</a></li>
     <ul>
-      <li>Current bid: ${{ listing.bid }}</li>
+      <li>Current bid: ${{ listing.high_bid }}</li>
       <li>{{ listing.description }}</li>
     </ul>
     <br>
