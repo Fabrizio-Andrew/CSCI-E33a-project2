@@ -23,7 +23,7 @@ class Bids(models.Model):
     user = models.ForeignKey('User', related_name='bidder', on_delete=models.CASCADE)
     listing = models.ForeignKey('Listing', related_name='listing_bid', on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=8, decimal_places=2)
-    timestamp = models.DateTimeField(auto_now=False)
+    timestamp = models.DateTimeField(auto_now_add=True)
 
 class Comments(models.Model):
     author = models.ForeignKey('User', related_name='author', on_delete=models.CASCADE)
