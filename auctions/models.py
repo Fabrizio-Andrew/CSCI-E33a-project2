@@ -10,7 +10,7 @@ class User(AbstractUser):
     bids = models.ManyToManyField('Listing', through='Bids', through_fields=('user', 'listing'), related_name='bids')
 
     def __str__(self):
-        return f"{self.pk}: {self.username}"
+        return f"<{self.pk}: {self.username}>"
 
 class Listing(models.Model):
     title = models.CharField(max_length=64)
@@ -23,7 +23,7 @@ class Listing(models.Model):
     active = models.BooleanField()
 
     def __str__(self):
-        return f"{self.pk}: {self.title} by {self.owner}"
+        return f"<{self.pk}: {self.title} by {self.owner}>"
 
 class Bids(models.Model):
     user = models.ForeignKey('User', related_name='bidder', on_delete=models.CASCADE)
@@ -32,7 +32,7 @@ class Bids(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.pk}: {self.amount} on {self.listing} by {self.owner}"
+        return f"<{self.pk}: {self.amount} on {self.listing} by {self.user}>"
 
 class Comments(models.Model):
     author = models.ForeignKey('User', related_name='author', on_delete=models.CASCADE)
@@ -41,4 +41,4 @@ class Comments(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.pk}: {self.author} comment on {self.listing}"
+        return f"<{self.pk}: {self.author} comment on {self.listing}>"

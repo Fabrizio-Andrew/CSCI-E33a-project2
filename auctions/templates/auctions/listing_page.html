@@ -4,7 +4,11 @@
 
 <img src="{{ listing.image_url }}" style="height: 50px; width: 50px"> <strong>{{ listing.title }}</strong></li>
   <ul>
-    <li>Current bid: ${{ current_bid }}</li>
+    {% if listing.high_bid %}
+      <li><strong>Current bid:</strong> ${{ listing.high_bid }}</li>
+    {% else %}
+      <li><strong>Starting bid:</strong> ${{ listing.starting_bid }}
+    {% endif %}
     <li>{{ listing.description }}</li>
   </ul>
   <br>

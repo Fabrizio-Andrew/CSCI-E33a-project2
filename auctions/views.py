@@ -67,7 +67,8 @@ def index(request):
     """
     listings = []
     for entry in Listing.objects.all():
-        entry.high_bid = max(Bids.objects.filter(listing=entry).values("amount"))['amount']
+        if Bids.objects.filter(listing=entry):
+            entry.high_bid = Bids.objects.filter(listing=entry).order_by('-amount')[0].amount
         listings.append(entry)
     return render(request, "auctions/index.html", {
         "listings": listings
@@ -103,12 +104,12 @@ def listing_page(request, listing_id, user_id):
     info, current bid, comments, and watchlist info as context for listing_page.html.
     """
     listing = Listing.objects.get(pk=listing_id)
-    high_bid = Bids.objects.filter(listing=listing).order_by('amount')[0]
+    if Bids.objects.filter(listing=listing):
+        listing.high_bid = Bids.objects.filter(listing=listing).order_by('-amount')[0].amount
+        print(listing.high_bid)
     context = {
         "listing": listing,
         "comments": Comments.objects.filter(listing=listing),
-        "current_bid": high_bid.amount,
-        "start_bid_ind": high_bid.starting_bid
     }
     if request.user.is_authenticated:
         user = User.objects.get(pk=user_id)
@@ -150,6 +151,7 @@ def categories(request):
     })
 
 def category_listing(request, category):
+# NEEDS UPDATE FOR BID VS. STARTING BID
     """
     Given a category, returns a list of listings with in that category as context
     for category_listing.html.
@@ -175,32 +177,35 @@ def add_comment(request):
 
 def bid(request):
     """
-    Work in Progress
+    Accepts bida data via POST, determines if the new bid is >= starting bid
+    and > high bid (if it exists), and creates the bid object as an instance of
+    models.Bids.
     """
     if request.method == "POST":
         listing = Listing.objects.get(pk=request.POST["listing_id"])
         user = User.objects.get(pk=request.POST["user_id"])
-        bid_amount = Decimal(request.POST["bid_amount"])
-        existing_bids = Bids.objects.filter(listing=listing, starting_bid=False).values("amount")['amount']
-        if existing_bids:
-            high_bid = Decimal(max(existing_bids))
-            if bid_amount > high_bid:
+        newbid_amount = Decimal(request.POST["bid_amount"])
+        high_bid = Bids.objects.filter(listing=listing).order_by('amount')[0]
+
+        if high_bid:
+            if newbid_amount > high_bid.amount:
                 newbid = Bids(user=user,
                         listing=listing,
-                        amount=bid_amount,
-                        starting_bid=False
+                        amount=newbid_amount,
                 )
                 newbid.save()
                 return HttpResponseRedirect(f"/listing/{listing.id}/{user.id}")
+
             else:
                 return print("ERROR: bid does not exceed current bid.")
-        elif bid_amount >= listing.starting_bid:
+# Perhaps this condition goes before or contains the high_bid condition?  Better for performance, anyway.
+        elif newbid_amount >= listing.starting_bid:
             newbid = Bids(user=user,
                     listing=listing,
-                    amount=bid_amount,
-                    starting_bid=False
+                    amount=newbid_amount,
             )
             newbid.save()
             return HttpResponseRedirect(f"/listing/{listing.id}/{user.id}")
+
         else:
             return print("ERROR: bid is lower than the starting bid")
