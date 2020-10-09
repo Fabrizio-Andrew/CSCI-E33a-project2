@@ -91,16 +91,10 @@ def create_listing(request):
                     image_url=request.POST["image_url"],
                     description=request.POST["description"],
                     owner=user,
-                    active=True
+                    active=True,
+                    starting_bid=request.POST["starting_bid"]
         )
         newlisting.save()
-        print(newlisting.pk)
-        startingbid = Bids(user=user,
-                        listing=newlisting,
-                        amount=request.POST["starting_bid"],
-                        starting_bid=True,
-        )
-        startingbid.save()
         return HttpResponseRedirect(reverse("index"))
 
 def listing_page(request, listing_id, user_id):
@@ -187,15 +181,10 @@ def bid(request):
         listing = Listing.objects.get(pk=request.POST["listing_id"])
         user = User.objects.get(pk=request.POST["user_id"])
         bid_amount = Decimal(request.POST["bid_amount"])
-        print(bid_amount)
-        starting_bid = Bids.objects.get(listing=listing, starting_bid=True)
-        existing_bids = Bids.objects.filter(listing=listing, starting_bid=False).values("amount")
+        existing_bids = Bids.objects.filter(listing=listing, starting_bid=False).values("amount")['amount']
         if existing_bids:
-            print(f"YES BIDS: {existing_bids}")
-            high_bid = max(existing_bids)['amount']
-            print(high_bid)
+            high_bid = Decimal(max(existing_bids))
             if bid_amount > high_bid:
-                print(max(existing_bids))
                 newbid = Bids(user=user,
                         listing=listing,
                         amount=bid_amount,
@@ -204,8 +193,8 @@ def bid(request):
                 newbid.save()
                 return HttpResponseRedirect(f"/listing/{listing.id}/{user.id}")
             else:
-                return print("ERROR: bid too small")
-        elif bid_amount >= starting_bid.amount:
+                return print("ERROR: bid does not exceed current bid.")
+        elif bid_amount >= listing.starting_bid:
             newbid = Bids(user=user,
                     listing=listing,
                     amount=bid_amount,
@@ -214,4 +203,4 @@ def bid(request):
             newbid.save()
             return HttpResponseRedirect(f"/listing/{listing.id}/{user.id}")
         else:
-            return print("ERROR: bid too small")
+            return print("ERROR: bid is lower than the starting bid")
