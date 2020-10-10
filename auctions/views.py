@@ -4,7 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from decimal import Decimal
-
+from . import util
 from .models import User, Listing, Comments, Bids
 
 
@@ -190,21 +190,8 @@ def bid(request):
         listing = Listing.objects.get(pk=request.POST["listing_id"])
         user = User.objects.get(pk=request.POST["user_id"])
         newbid_amount = Decimal(request.POST["bid_amount"])
-        high_bid = Bids.objects.filter(listing=listing).order_by('amount')[0]
 
-        if high_bid:
-            if newbid_amount > high_bid.amount:
-                newbid = Bids(user=user,
-                        listing=listing,
-                        amount=newbid_amount,
-                )
-                newbid.save()
-                return HttpResponseRedirect(f"/listing/{listing.id}/{user.id}")
-
-            else:
-                return print("ERROR: bid does not exceed current bid.")
-# Perhaps this condition goes before or contains the high_bid condition?  Better for performance, anyway.
-        elif newbid_amount >= listing.starting_bid:
+        if newbid_amount > util.high_bid(listing) and newbid_amount >= listing.starting_bid:
             newbid = Bids(user=user,
                     listing=listing,
                     amount=newbid_amount,
@@ -212,5 +199,4 @@ def bid(request):
             newbid.save()
             return HttpResponseRedirect(f"/listing/{listing.id}/{user.id}")
 
-        else:
-            return print("ERROR: bid is lower than the starting bid")
+        return print("ERROR: bid does not exceed current bid.")
