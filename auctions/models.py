@@ -25,6 +25,11 @@ class Listing(models.Model):
     def __str__(self):
         return f"<{self.pk}: {self.title} by {self.owner}>"
 
+    def high_bid(self):
+        if Bids.objects.filter(listing=self):
+            return Bids.objects.filter(listing=self).order_by('-amount')[0].amount
+        return 0
+
 class Bids(models.Model):
     user = models.ForeignKey('User', related_name='bidder', on_delete=models.CASCADE)
     listing = models.ForeignKey('Listing', related_name='listing_bid', on_delete=models.CASCADE)

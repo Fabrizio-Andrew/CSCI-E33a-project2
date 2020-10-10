@@ -4,7 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from decimal import Decimal
-from . import util
+
 from .models import User, Listing, Comments, Bids
 
 
@@ -66,10 +66,11 @@ def index(request):
     listing object to a list called "listings".
     """
     listings = []
-    for entry in Listing.objects.all():
-        if Bids.objects.filter(listing=entry):
-            entry.high_bid = Bids.objects.filter(listing=entry).order_by('-amount')[0].amount
-        listings.append(entry)
+    for listing in Listing.objects.all():
+        high_bid = Listing.high_bid(listing)
+        if high_bid != 0:
+            listing.high_bid = high_bid
+        listings.append(listing)
     return render(request, "auctions/index.html", {
         "listings": listings
     })
@@ -104,9 +105,10 @@ def listing_page(request, listing_id, user_id):
     info, current bid, comments, and watchlist info as context for listing_page.html.
     """
     listing = Listing.objects.get(pk=listing_id)
-    if Bids.objects.filter(listing=listing):
-        listing.high_bid = Bids.objects.filter(listing=listing).order_by('-amount')[0].amount
-        print(listing.high_bid)
+
+    high_bid = Listing.high_bid(listing)
+    if high_bid != 0:
+        listing.high_bid = high_bid
     context = {
         "listing": listing,
         "comments": Comments.objects.filter(listing=listing),
@@ -157,10 +159,11 @@ def category_listing(request, category):
     high bid (if any) as context for category_listing.html.
     """
     listings = []
-    for entry in Listing.objects.filter(category=category):
-        if Bids.objects.filter(listing=entry):
-            entry.high_bid = Bids.objects.filter(listing=entry).order_by('-amount')[0].amount
-        listings.append(entry)
+    for listing in Listing.objects.all():
+        high_bid = Listing.high_bid(listing)
+        if high_bid != 0:
+            listing.high_bid = high_bid
+        listings.append(listing)
     return render(request, "auctions/index.html", {
         "category": category,
         "listings": listings
@@ -191,7 +194,7 @@ def bid(request):
         user = User.objects.get(pk=request.POST["user_id"])
         newbid_amount = Decimal(request.POST["bid_amount"])
 
-        if newbid_amount > util.high_bid(listing) and newbid_amount >= listing.starting_bid:
+        if newbid_amount > Listing.high_bid(listing) and newbid_amount >= listing.starting_bid:
             newbid = Bids(user=user,
                     listing=listing,
                     amount=newbid_amount,
