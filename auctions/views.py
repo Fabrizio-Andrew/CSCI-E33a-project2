@@ -153,12 +153,17 @@ def categories(request):
 def category_listing(request, category):
 # NEEDS UPDATE FOR BID VS. STARTING BID
     """
-    Given a category, returns a list of listings with in that category as context
-    for category_listing.html.
+    Given a category, returns a list of listings with in that category with associated
+    high bid (if any) as context for category_listing.html.
     """
-    return render(request, "auctions/category_listing.html", {
+    listings = []
+    for entry in Listing.objects.filter(category=category):
+        if Bids.objects.filter(listing=entry):
+            entry.high_bid = Bids.objects.filter(listing=entry).order_by('-amount')[0].amount
+        listings.append(entry)
+    return render(request, "auctions/index.html", {
         "category": category,
-        "listings": Listing.objects.filter(category=category)
+        "listings": listings
     })
 
 def add_comment(request):

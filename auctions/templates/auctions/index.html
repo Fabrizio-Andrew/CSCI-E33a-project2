@@ -1,8 +1,14 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-    <h2>Active Listings</h2>
+
+    <h2>Active Listings
+      {% if category %}
+      : {{ category }}
+      {% endif %}
+    </h2>
 <ol>
+  {% if listings %}
   {% for listing in listings %}
   <li><img src="{{ listing.image_url }}" style="height: 50px; width: 50px"> <a href = "/listing/{{ listing.pk }}/{{ user.id }}">{{ listing.title }}</a></li>
     <ul>
@@ -15,9 +21,13 @@
     </ul>
     <br>
   {% endfor%}
+  {% else %}
+  <p>No Listings</p>
+  {% endif %}
 </ol>
 
-
+{% if not category %}
     <a class="nav-link" href="{% url 'new_listing' %}">Create New Listing</a>
+{% endif %}
 
 {% endblock %}
