@@ -1,14 +1,24 @@
+"""
+Commerce Views Module
+
+This module contains the functions that support all logic for addiing, removing,
+updating, and displaying data associated with the Commerce app.
+"""
+
+from decimal import Decimal
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
-from decimal import Decimal
-
 from .models import User, Listing, Comments, Bids
 
 
 def login_view(request):
+    """
+    Given a username and password via POST, authenticates the user via
+    django.contrib.auth.authenticate.
+    """
     if request.method == "POST":
 
         # Attempt to sign user in
@@ -29,11 +39,18 @@ def login_view(request):
 
 
 def logout_view(request):
+    """
+    Logs out the current user.
+    """
     logout(request)
     return HttpResponseRedirect(reverse("index"))
 
 
 def register(request):
+    """
+    Given a username, email, password, and pw confirmation, creates a new User
+    object with the given credential.
+    """
     if request.method == "POST":
         username = request.POST["username"]
         email = request.POST["email"]
@@ -59,6 +76,7 @@ def register(request):
     else:
         return render(request, "auctions/register.html")
 
+
 def index(request):
     """
     For all objects in Listing, gets the highest bid amount from all related bid
@@ -77,6 +95,9 @@ def index(request):
 
 
 def new_listing(request):
+    """
+    Returns the create_listing page.
+    """
     return render(request, "auctions/create_listing.html")
 
 
@@ -89,15 +110,16 @@ def create_listing(request):
     if request.method == "POST":
         user = User.objects.get(pk=request.POST["user_id"])
         newlisting = Listing(title=request.POST["title"],
-                    category=request.POST["category"],
-                    image_url=request.POST["image_url"],
-                    description=request.POST["description"],
-                    owner=user,
-                    active=True,
-                    starting_bid=request.POST["starting_bid"]
-        )
+                             category=request.POST["category"],
+                             image_url=request.POST["image_url"],
+                             description=request.POST["description"],
+                             owner=user,
+                             active=True,
+                             starting_bid=request.POST["starting_bid"]
+                             )
         newlisting.save()
-        return HttpResponseRedirect(reverse("index"))
+    return HttpResponseRedirect(reverse("index"))
+
 
 def listing_page(request, listing_id, user_id):
     """
@@ -132,7 +154,8 @@ def watch(request):
             user.watchlist.remove(listing)
         else:
             user.watchlist.add(listing)
-        return HttpResponseRedirect(f"/listing/{listing.id}/{user.id}")
+    return HttpResponseRedirect(f"/listing/{listing.id}/{user.id}")
+
 
 def watchlist(request, user_id):
     """
@@ -143,6 +166,7 @@ def watchlist(request, user_id):
         "watchlist": user.watchlist.all()
     })
 
+
 def categories(request):
     """
     Gets a list of distinct categories from the Listing table and provides list
@@ -152,8 +176,8 @@ def categories(request):
         "categories": Listing.objects.values('category').distinct()
     })
 
+
 def category_listing(request, category):
-# NEEDS UPDATE FOR BID VS. STARTING BID
     """
     Given a category, returns a list of listings with in that category with associated
     high bid (if any) as context for category_listing.html.
@@ -169,6 +193,7 @@ def category_listing(request, category):
         "listings": listings
     })
 
+
 def add_comment(request):
     """
     Accepts data via POST to create a Comment object associated to a User and Listing.
@@ -177,11 +202,12 @@ def add_comment(request):
         listing = Listing.objects.get(pk=request.POST["listing_id"])
         user = User.objects.get(pk=request.POST["user_id"])
         newcomment = Comments(author=user,
-                    listing=listing,
-                    body=request.POST["comment"]
-        )
+                              listing=listing,
+                              body=request.POST["comment"]
+                              )
         newcomment.save()
     return HttpResponseRedirect(f"/listing/{listing.id}/{user.id}")
+
 
 def bid(request):
     """
@@ -202,21 +228,22 @@ def bid(request):
         }
         if newbid_amount > Listing.high_bid(listing) and newbid_amount >= listing.starting_bid:
             newbid = Bids(user=user,
-                    listing=listing,
-                    amount=newbid_amount,
-            )
+                          listing=listing,
+                          amount=newbid_amount,
+                          )
             newbid.save()
             listing.high_bid = Listing.high_bid(listing)
             context['message'] = "Bid Accepted"
             return render(request, "auctions/listing_page.html", context)
         if Listing.high_bid != 0:
             listing.high_bid = Listing.high_bid(listing)
-        context['message'] = "ERROR: Bid must at least equal the starting bid and exceed the current high bid.  Please increase your bid."
-        return render(request, "auctions/listing_page.html", context)
+        context['message'] = "ERROR: Please increase your bid."
+    return render(request, "auctions/listing_page.html", context)
+
 
 def close(request):
     """
-    Given a listing and user via POST, if the user is the owner of the listing, 
+    Given a listing and user via POST, if the user is the owner of the listing,
     set listing.active to False and listing.winner to the current high bidder.
     """
     if request.method == "POST":
@@ -227,5 +254,4 @@ def close(request):
             if Bids.objects.filter(listing=listing):
                 listing.winner = Bids.objects.filter(listing=listing).order_by('-amount')[0].user
             listing.save(update_fields=['active', 'winner'])
-
-        return HttpResponseRedirect(f"/listing/{listing.id}/{user.id}")
+    return HttpResponseRedirect(f"/listing/{listing.id}/{user.id}")
