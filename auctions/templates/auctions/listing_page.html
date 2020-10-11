@@ -2,6 +2,12 @@
 
 {% block body %}
 
+{% if message %}
+  <strong>{{ message }}</strong>
+  <br>
+{% endif %}
+
+
 <img src="{{ listing.image_url }}" style="height: 50px; width: 50px"> <strong>{{ listing.title }}</strong></li>
   <ul>
     {% if listing.high_bid %}

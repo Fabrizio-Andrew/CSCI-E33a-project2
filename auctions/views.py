@@ -194,15 +194,25 @@ def bid(request):
         user = User.objects.get(pk=request.POST["user_id"])
         newbid_amount = Decimal(request.POST["bid_amount"])
 
+        context = {
+            "listing": listing,
+            "comments": Comments.objects.filter(listing=listing),
+            "watchlist": user.watchlist.all(),
+            "user": user,
+        }
         if newbid_amount > Listing.high_bid(listing) and newbid_amount >= listing.starting_bid:
             newbid = Bids(user=user,
                     listing=listing,
                     amount=newbid_amount,
             )
             newbid.save()
-            return HttpResponseRedirect(f"/listing/{listing.id}/{user.id}")
-
-        return print("ERROR: bid does not exceed current bid.")
+            listing.high_bid = Listing.high_bid(listing)
+            context['message'] = "Bid Accepted"
+            return render(request, "auctions/listing_page.html", context)
+        if Listing.high_bid != 0:
+            listing.high_bid = Listing.high_bid(listing)
+        context['message'] = "ERROR: Bid must at least equal the starting bid and exceed the current high bid.  Please increase your bid."
+        return render(request, "auctions/listing_page.html", context)
 
 def close(request):
     """
