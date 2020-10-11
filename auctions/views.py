@@ -91,21 +91,16 @@ def index(request):
         listings.append(listing)
     return render(request, "auctions/index.html", {
         "listings": listings
-    })
+    })  
 
 
 def new_listing(request):
     """
-    Returns the create_listing page.
-    """
-    return render(request, "auctions/create_listing.html")
-
-
-def create_listing(request):
-    """
-    Given the details of the user, listing, and starting bid for an item,
+    Given the details of the user, listing, and starting bid for an item via POST,
     create instances of the Listing and Bids models to represent the item and
     starting bid.  Return redirect to index.
+
+    For GET requests, render the create_listing form.
     """
     if request.method == "POST":
         user = User.objects.get(pk=request.POST["user_id"])
@@ -118,7 +113,8 @@ def create_listing(request):
                              starting_bid=request.POST["starting_bid"]
                              )
         newlisting.save()
-    return HttpResponseRedirect(reverse("index"))
+        return HttpResponseRedirect(reverse("index"))
+    return render(request, "auctions/create_listing.html")
 
 
 def listing_page(request, listing_id, user_id):

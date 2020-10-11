@@ -9,7 +9,7 @@
     {% endif %}
 
     {% if user.is_authenticated %}
-      <form action="{% url 'create_listing' %}" method="POST">
+      <form action="{% url 'new_listing' %}" method="POST">
           {% csrf_token %}
           <div class="form-group">
               <input autofocus class="form-control" type="text" name="title" placeholder="Title">

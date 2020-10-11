@@ -48,9 +48,8 @@
   {% endif %}
 {% else %}
   <p>Auction is closed</p>
-  <p>Auction winner is {{ listing.winner }}</p>
   {% if listing.winner == user %}
-    <h2>You won! Congratulations!</h2>
+    <h2>You won this auction! Congratulations!</h2>
   {% endif %}
 {% endif %}
 <br>
