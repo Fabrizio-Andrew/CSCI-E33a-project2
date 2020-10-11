@@ -15,6 +15,14 @@
 
 
 {% if user.is_authenticated %}
+  {% if user == listing.owner %}
+    <form action={% url 'close' %} method='POST'>
+      {%csrf_token %}
+      <input type="hidden" value="{{ listing.id }}" name="listing_id">
+      <input type="hidden" value="{{ user.id }}" name="user_id">
+      <input class="btn btn-primary" type="Submit" Name="Close" value="Close">
+    </form>
+  {% endif %}
   <form action="{% url 'bid' %}" method="POST">
     {% csrf_token %}
     <input type="hidden" value="{{ listing.id }}" name="listing_id">

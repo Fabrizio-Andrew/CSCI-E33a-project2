@@ -203,3 +203,17 @@ def bid(request):
             return HttpResponseRedirect(f"/listing/{listing.id}/{user.id}")
 
         return print("ERROR: bid does not exceed current bid.")
+
+def close(request):
+    """
+    Given a listing and user via POST, if the user is the owner of the listing, 
+    set listing.active to False.
+    """
+    if request.method == POST:
+        listing = Listing.objects.get(pk=request.POST["listing_id"])
+        user = User.objects.get(pk=request.POST["user_id"])
+        if user == listing.owner:
+            listing.active = False
+            listing.save(update_fields=['active'])
+
+        return HttpResponseRedirect(f"/listing/{listing.id}/{user.id}")
