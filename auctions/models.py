@@ -12,6 +12,10 @@ class User(AbstractUser):
     def __str__(self):
         return f"<{self.pk}: {self.username}>"
 
+    class Meta:
+        verbose_name = 'User'
+        verbose_name_plural = 'Users'
+
 class Listing(models.Model):
     title = models.CharField(max_length=64)
     description = models.TextField(max_length=500)
@@ -25,6 +29,10 @@ class Listing(models.Model):
 
     def __str__(self):
         return f"<{self.pk}: {self.title} by {self.owner}>"
+
+    class Meta:
+        verbose_name = 'Listing'
+        verbose_name_plural = 'Listings'
 
     def high_bid(self):
         if Bids.objects.filter(listing=self):
@@ -40,6 +48,10 @@ class Bids(models.Model):
     def __str__(self):
         return f"<{self.pk}: {self.amount} on {self.listing} by {self.user}>"
 
+    class Meta:
+        verbose_name = 'Bid'
+        verbose_name_plural = 'Bids'
+
 class Comments(models.Model):
     author = models.ForeignKey('User', related_name='author', on_delete=models.CASCADE)
     listing = models.ForeignKey('Listing', related_name='listing_comment', on_delete=models.CASCADE)
@@ -48,3 +60,7 @@ class Comments(models.Model):
 
     def __str__(self):
         return f"<{self.pk}: {self.author} comment on {self.listing}>"
+
+    class Meta:
+        verbose_name = 'Comment'
+        verbose_name_plural = 'Comments'
