@@ -207,13 +207,15 @@ def bid(request):
 def close(request):
     """
     Given a listing and user via POST, if the user is the owner of the listing, 
-    set listing.active to False.
+    set listing.active to False and listing.winner to the current high bidder.
     """
-    if request.method == POST:
+    if request.method == "POST":
         listing = Listing.objects.get(pk=request.POST["listing_id"])
         user = User.objects.get(pk=request.POST["user_id"])
         if user == listing.owner:
             listing.active = False
-            listing.save(update_fields=['active'])
+            if Bids.objects.filter(listing=listing):
+                listing.winner = Bids.objects.filter(listing=listing).order_by('-amount')[0].user
+            listing.save(update_fields=['active', 'winner'])
 
         return HttpResponseRedirect(f"/listing/{listing.id}/{user.id}")

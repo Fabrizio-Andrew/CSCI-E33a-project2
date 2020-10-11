@@ -11,37 +11,41 @@
     {% endif %}
     <li>{{ listing.description }}</li>
   </ul>
-  <br>
-
-
-{% if user.is_authenticated %}
-  {% if user == listing.owner %}
-    <form action={% url 'close' %} method='POST'>
-      {%csrf_token %}
+  <hr>
+{% if listing.active == True %}
+  {% if user.is_authenticated %}
+    <form action="{% url 'bid' %}" method="POST">
+     {% csrf_token %}
       <input type="hidden" value="{{ listing.id }}" name="listing_id">
       <input type="hidden" value="{{ user.id }}" name="user_id">
-      <input class="btn btn-primary" type="Submit" Name="Close" value="Close">
+      <input type="number" required="True" name="bid_amount" placeholder="Enter Bid">
+      <input class="btn btn-primary" type="Submit" Name="Submit" value="Submit">
+    </form>
+    {% if user == listing.owner %}
+      <form action={% url 'close' %} method='POST'>
+        {%csrf_token %}
+        <input type="hidden" value="{{ listing.id }}" name="listing_id">
+        <input type="hidden" value="{{ user.id }}" name="user_id">
+        <input class="btn btn-primary" type="Submit" Name="Close" value="Close Auction">
+      </form>
+    {% endif %}
+    <form action="{% url 'watch' %}" method="POST">
+      {% csrf_token %}
+      <input type="hidden" value="{{ listing.id }}" name="listing_id">
+      <input type="hidden" value="{{ user.id }}" name="user_id">
+      {% if listing in watchlist %}
+        <input class="btn btn-secondary" type="Submit" Name="Unwatch" value="Unwatch">
+      {% elif listing not in watchlist %}
+        <input class="btn btn-primary" type="Submit" Name="Watch" value="Watch">
+      {% endif %}
     </form>
   {% endif %}
-  <form action="{% url 'bid' %}" method="POST">
-    {% csrf_token %}
-    <input type="hidden" value="{{ listing.id }}" name="listing_id">
-    <input type="hidden" value="{{ user.id }}" name="user_id">
-    <input type="number" required="True" name="bid_amount" placeholder="Enter Bid">
-    <input class="btn btn-primary" type="Submit" Name="Submit" value="Submit">
-  </form>
-
-  <form action="{% url 'watch' %}" method="POST">
-    {% csrf_token %}
-    <input type="hidden" value="{{ listing.id }}" name="listing_id">
-    <input type="hidden" value="{{ user.id }}" name="user_id">
-<!--Is it okay to include this conditional in html, or should that be in views.py?-->
-    {% if listing in watchlist %}
-      <input class="btn btn-secondary" type="Submit" Name="Unwatch" value="Unwatch">
-    {% elif listing not in watchlist %}
-      <input class="btn btn-primary" type="Submit" Name="Watch" value="Watch">
-    {% endif %}
-  </form>
+{% else %}
+  <p>Auction is closed</p>
+  <p>Auction winner is {{ listing.winner }}</p>
+  {% if listing.winner == user %}
+    <h2>You won! Congratulations!</h2>
+  {% endif %}
 {% endif %}
 <br>
 <strong>Comments:</strong>

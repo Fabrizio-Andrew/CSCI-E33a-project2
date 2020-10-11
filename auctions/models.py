@@ -21,6 +21,7 @@ class Listing(models.Model):
     category = models.CharField(max_length=64)
     owner = models.ForeignKey('User', related_name='listing_owner', on_delete=models.CASCADE)
     active = models.BooleanField()
+    winner = models.ForeignKey('User', related_name='listing_winner', on_delete=models.CASCADE, blank=True, null=True)
 
     def __str__(self):
         return f"<{self.pk}: {self.title} by {self.owner}>"
