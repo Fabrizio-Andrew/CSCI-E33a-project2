@@ -24,7 +24,7 @@
      {% csrf_token %}
       <input type="hidden" value="{{ listing.id }}" name="listing_id">
       <input type="hidden" value="{{ user.id }}" name="user_id">
-      <input type="number" required="True" name="bid_amount" placeholder="Enter Bid">
+      {{ form }}
       <input class="btn btn-primary" type="Submit" Name="Submit" value="Submit">
     </form>
     {% if user == listing.owner %}

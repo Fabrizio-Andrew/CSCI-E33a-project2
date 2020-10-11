@@ -12,6 +12,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from .models import User, Listing, Comments, Bids
+from .forms import NewListingForm, BidForm
 
 
 def login_view(request):
@@ -114,7 +115,9 @@ def new_listing(request):
                              )
         newlisting.save()
         return HttpResponseRedirect(reverse("index"))
-    return render(request, "auctions/create_listing.html")
+    return render(request, "auctions/create_listing.html", {
+        "form": NewListingForm()
+    })
 
 
 def listing_page(request, listing_id, user_id):
@@ -130,6 +133,7 @@ def listing_page(request, listing_id, user_id):
     context = {
         "listing": listing,
         "comments": Comments.objects.filter(listing=listing),
+        "form": BidForm()
     }
     if request.user.is_authenticated:
         user = User.objects.get(pk=user_id)
