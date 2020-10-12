@@ -1,11 +1,8 @@
 {% extends "auctions/layout.html" %}
 
-{% block body %}
+{% block title %}{{ listing.title }}{% endblock %}
 
-{% if message %}
-  <strong>{{ message }}</strong>
-  <br>
-{% endif %}
+{% block body %}
 
 <img src="{{ listing.image_url }}" style="height: 50px; width: 50px"> <strong>{{ listing.title }}</strong></li>
   <ul>
@@ -26,6 +23,10 @@
       {{ form }}
       <input class="btn btn-primary" type="Submit" Name="Submit_bid" value="Submit Bid">
     </form>
+    {% if message %}
+      <strong>{{ message }}</strong>
+      <br>
+    {% endif %}
     <hr>
     <table style='height: 30px'>
       <tr>
@@ -68,7 +69,7 @@
     {% for comment in comments %}
       <li>{{ comment.body }}</li>
         <ul>
-          <li style="font-style: italic">{{ comment.author.username }} -- {{ comment.timestamp }}</li>
+          <li style="font-style: italic">{{ comment.author.username }} -- {{ comment.timestamp }} UTC</li>
         </ul>
         <br>
     {% endfor %}

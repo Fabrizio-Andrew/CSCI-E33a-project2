@@ -13,11 +13,11 @@
   <li><img src="{{ listing.image_url }}" style="height: 50px; width: 50px"> <a href = "/listing/{{ listing.pk }}/{{ user.id }}">{{ listing.title }}</a></li>
     <ul>
       {% if listing.high_bid > 0 %}
-        <li>Current bid: ${{ listing.high_bid }}</li>
+        <li><strong>Current bid:</strong> ${{ listing.high_bid }}</li>
       {% else %}
-        <li>Starting bid: ${{ listing.starting_bid }}
-      {% endif %}
-      <li>{{ listing.description }}</li>
+        <li><strong>Starting bid:</strong> ${{ listing.starting_bid }}
+        {% endif %}
+      <li><strong>Description:</strong> {{ listing.description }}</li>
     </ul>
     <br>
   {% endfor%}

@@ -6,6 +6,7 @@ Contains form classes to collect & validate info.
 
 from django import forms
 
+
 class NewListingForm(forms.Form):
     """
     Form class to collect info necessary to create a new listing.
@@ -15,6 +16,7 @@ class NewListingForm(forms.Form):
     category = forms.CharField(max_length=64)
     image_url = forms.URLField(required=False)
     description = forms.CharField(widget=forms.Textarea, max_length=500)
+
 
 class BidForm(forms.Form):
     """

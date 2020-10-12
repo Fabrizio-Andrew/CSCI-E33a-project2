@@ -87,7 +87,7 @@ def index(request):
     """
     return render(request, "auctions/index.html", {
         "listings": append_highbids(Listing.objects.filter(active=True))
-    })  
+    })
 
 
 def new_listing(request):
@@ -179,7 +179,7 @@ def category_listing(request, category):
     """
     listings = []
     for listing in Listing.objects.filter(category=category):
-        if listing.active == True:
+        if listing.active is True:
             listings.append(listing)
     return render(request, "auctions/index.html", {
         "category": category,
@@ -250,11 +250,11 @@ def close(request):
             listing.save(update_fields=['active', 'winner'])
     return HttpResponseRedirect(f"/listing/{listing.id}/{user.id}")
 
-def my_wins(request,user_id):
+
+def my_wins(request, user_id):
     """
     Renders a list of auctions the user has won on my_wins.html.
     """
-
     user = User.objects.get(pk=user_id)
     return render(request, "auctions/my_wins.html", {
         "listings": Listing.objects.filter(winner=user)

@@ -1,4 +1,13 @@
+"""
+Commerce Util Module
+
+This module contains functions that are consumed by multiple views.py methods,
+but don't necessarily belong within a particular model.  (Right now, it's just
+append_highbids)
+"""
+
 from .models import Listing
+
 
 def append_highbids(listings):
     """
