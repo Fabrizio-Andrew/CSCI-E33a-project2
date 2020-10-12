@@ -13,6 +13,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from .models import User, Listing, Comments, Bids
 from .forms import NewListingForm, BidForm
+from .util import append_highbids
 
 
 def login_view(request):
@@ -84,14 +85,8 @@ def index(request):
     objects.  Appends "high_bid" to the listing object, and appends the updated
     listing object to a list called "listings".
     """
-    listings = []
-    for listing in Listing.objects.all():
-        high_bid = Listing.high_bid(listing)
-        if high_bid != 0:
-            listing.high_bid = high_bid
-        listings.append(listing)
     return render(request, "auctions/index.html", {
-        "listings": listings
+        "listings": append_highbids(Listing.objects.filter(active=True))
     })  
 
 
@@ -163,7 +158,7 @@ def watchlist(request, user_id):
     """
     user = User.objects.get(pk=user_id)
     return render(request, "auctions/watchlist.html", {
-        "watchlist": user.watchlist.all()
+        "listings":  append_highbids(user.watchlist.all())
     })
 
 
@@ -173,7 +168,7 @@ def categories(request):
     as context for categories.html.
     """
     return render(request, "auctions/categories.html", {
-        "categories": Listing.objects.values('category').distinct()
+        "categories": Listing.objects.filter(active=True).values('category').distinct()
     })
 
 
@@ -183,14 +178,12 @@ def category_listing(request, category):
     high bid (if any) as context for category_listing.html.
     """
     listings = []
-    for listing in Listing.objects.all():
-        high_bid = Listing.high_bid(listing)
-        if high_bid != 0:
-            listing.high_bid = high_bid
-        listings.append(listing)
+    for listing in Listing.objects.filter(category=category):
+        if listing.active == True:
+            listings.append(listing)
     return render(request, "auctions/index.html", {
         "category": category,
-        "listings": listings
+        "listings": append_highbids(listings)
     })
 
 
@@ -225,6 +218,7 @@ def bid(request):
             "comments": Comments.objects.filter(listing=listing),
             "watchlist": user.watchlist.all(),
             "user": user,
+            "form": BidForm()
         }
         if newbid_amount > Listing.high_bid(listing) and newbid_amount >= listing.starting_bid:
             newbid = Bids(user=user,
@@ -255,3 +249,13 @@ def close(request):
                 listing.winner = Bids.objects.filter(listing=listing).order_by('-amount')[0].user
             listing.save(update_fields=['active', 'winner'])
     return HttpResponseRedirect(f"/listing/{listing.id}/{user.id}")
+
+def my_wins(request,user_id):
+    """
+    Renders a list of auctions the user has won on my_wins.html.
+    """
+
+    user = User.objects.get(pk=user_id)
+    return render(request, "auctions/my_wins.html", {
+        "listings": Listing.objects.filter(winner=user)
+    })

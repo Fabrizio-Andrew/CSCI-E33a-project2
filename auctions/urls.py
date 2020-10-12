@@ -19,5 +19,6 @@ urlpatterns = [
     path("category_listing/<str:category>", views.category_listing, name="category_listing"),
     path("add_comment", views.add_comment, name="add_comment"),
     path("bid", views.bid, name="bid"),
-    path("close", views.close, name="close")
+    path("close", views.close, name="close"),
+    path("wins/<str:user_id>", views.my_wins, name="wins")
 ]

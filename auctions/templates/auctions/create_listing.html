@@ -11,6 +11,8 @@
     {% if user.is_authenticated %}
       <form action="{% url 'new_listing' %}" method="POST">
           {% csrf_token %}
+          <input type="hidden" value="{{ listing.id }}" name="listing_id">
+          <input type="hidden" value="{{ user.id }}" name="user_id"> 
           <div class="form-group">
             <table>
                 {{ form.as_table }}
