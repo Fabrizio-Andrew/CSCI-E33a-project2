@@ -4,27 +4,28 @@
 
     <h2>Active Listings
       {% if category %}
-      : {{ category }}
+        : {{ category }}
       {% endif %}
     </h2>
-<ol>
-  {% if listings %}
-  {% for listing in listings %}
-  <li><img src="{{ listing.image_url }}" style="height: 50px; width: 50px"> <a href = "/listing/{{ listing.pk }}/{{ user.id }}">{{ listing.title }}</a></li>
-    <ul>
-      {% if listing.high_bid > 0 %}
-        <li><strong>Current bid:</strong> ${{ listing.high_bid }}</li>
-      {% else %}
-        <li><strong>Starting bid:</strong> ${{ listing.starting_bid }}
-        {% endif %}
-      <li><strong>Description:</strong> {{ listing.description }}</li>
-    </ul>
-    <br>
-  {% endfor%}
-  {% else %}
+{% if listings %}
+  <ol>
+    {% for listing in listings %}
+    <li><img src="{{ listing.image_url }}" style="height: 50px; width: 50px"> <a href = "/listing/{{ listing.pk }}/{{ user.id }}">{{ listing.title }}</a></li>
+      <ul>
+        {% if listing.high_bid > 0 %}
+          <li><strong>Current bid:</strong> ${{ listing.high_bid }}</li>
+        {% else %}
+          <li><strong>Starting bid:</strong> ${{ listing.starting_bid }}
+          {% endif %}
+        <li><strong>Description:</strong> {{ listing.description }}</li>
+      </ul>
+      <br>
+    {% endfor%}
+  </ol>
+{% else %}
   <p>No Listings</p>
-  {% endif %}
-</ol>
+{% endif %}
+
 
 {% if not category %}
     <a class="nav-link" href="{% url 'new_listing' %}">Create New Listing</a>

@@ -6,10 +6,6 @@
 
     <h2>Create New Listing</h2>
 
-    {% if message %}
-        <div>{{ message }}</div>
-    {% endif %}
-
     {% if user.is_authenticated %}
       <form action="{% url 'new_listing' %}" method="POST">
           {% csrf_token %}
@@ -22,7 +18,7 @@
           <input class="btn btn-primary" type="submit">
       </form>
     {% else %}
-    <h2>Login to create a listing.</h2>
+      <strong>Login to create a listing.</strong>
     {% endif %}
 
 

@@ -5,18 +5,18 @@
 {% block body %}
 
     <h2>{{ user.username }}'s Winning Bids</h2>
-<ol>
-    {% if listings %}
+{% if listings %}
+    <ol>   
         {% for listing in listings %}
-        <li><img src="{{ listing.image_url }}" style="height: 50px; width: 50px"> <a href = "/listing/{{ listing.pk }}/{{ user.id }}">{{ listing.title }}</a></li>
-        <ul>
-            <li><strong>Winning bid:</strong> ${{ listing.high_bid }}</li>
-            <li><strong>Description:</strong> {{ listing.description }}</li>
-        </ul>
-        <br>
+            <li><img src="{{ listing.image_url }}" style="height: 50px; width: 50px"> <a href = "/listing/{{ listing.pk }}/{{ user.id }}">{{ listing.title }}</a></li>
+            <ul>
+                <li><strong>Winning bid:</strong> ${{ listing.high_bid }}</li>
+                <li><strong>Description:</strong> {{ listing.description }}</li>
+            </ul>
+            <br>
         {% endfor%}
-    {% else %}
+    </ol>
+{% else %}
     <p>No Listings</p>
-  {% endif %}
-</ol>
+{% endif %}
 {% endblock %}
